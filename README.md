@@ -77,7 +77,7 @@ This model performed better than the MLP and transformer, suggesting that local 
 
 `EEGSubtractiveConv2D` was the best-performing architecture tested. It uses paired convolutional branches at each convolution stage, then subtracts one learned branch from the other with trainable scaling factors.
 
-This subtractive design matched the structure of the EEG setup well: the signal was already based on two frontal EEG channels with a reference electrode behind the left ear, and the model benefited from explicitly learning contrastive feature differences. Across validation trials, it achieved the strongest results, with about 77.7% average validation accuracy and about 84.5% best validation accuracy.
+This subtractive design matched the structure of the EEG setup well: the signal was already based on two frontal EEG channels with a reference electrode behind the left ear, and the model benefited from explicitly learning contrastive feature differences. Across validation trials, it achieved the strongest results, with about 84.5% best validation accuracy.
 
 The production EEG pipeline uses this subtractive convolutional model.
 
