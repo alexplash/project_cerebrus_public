@@ -1,0 +1,9 @@
+scipy
+pandas
+numpy
+msgpack
+pylsl
+mne
+python-socketio[client]
+python-dotenv
+pyserial

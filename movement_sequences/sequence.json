@@ -1,0 +1,39 @@
+{
+  "sequences": [
+    {
+      "name": "default",
+      "steps": [
+        { "pose": "default", "duration": 0.5 }
+      ]
+    },
+    {
+      "name": "forward",
+      "steps": [
+        { "pose": "forward_step_1", "duration": 0.25 },
+        { "pose": "forward_step_2", "duration": 0.25 },
+        { "pose": "forward_step_3", "duration": 0.25 },
+        { "pose": "forward_step_4", "duration": 0.25 },
+        { "pose": "forward_step_5", "duration": 0.25 },
+        { "pose": "forward_step_6", "duration": 0.25 }
+      ]
+    },
+    {
+      "name": "turn_left",
+      "steps": [
+        { "pose": "left_step_1", "duration": 0.25 },
+        { "pose": "left_step_2", "duration": 0.25 },
+        { "pose": "left_step_3", "duration": 0.25 },
+        { "pose": "left_step_4", "duration": 0.25 }
+      ]
+    },
+    {
+      "name": "turn_right",
+      "steps": [
+        { "pose": "right_step_1", "duration": 0.25 },
+        { "pose": "right_step_2", "duration": 0.25 },
+        { "pose": "right_step_3", "duration": 0.25 },
+        { "pose": "right_step_4", "duration": 0.25 }
+      ]
+    }
+  ]
+}

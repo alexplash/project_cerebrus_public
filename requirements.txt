@@ -1,0 +1,13 @@
+scipy
+pandas
+numpy
+h5py
+pyarrow
+msgpack
+pylsl
+mne
+torch
+scikit-learn
+python-socketio[client]
+python-dotenv
+pyserial

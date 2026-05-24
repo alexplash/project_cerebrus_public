@@ -1,0 +1,12 @@
+
+.env
+ainex/
+venv/
+
+.DS_Store
+.DS_store
+*.mat
+*.parquet
+
+eeg/training/model_weights/
+eeg/training/training_data/
