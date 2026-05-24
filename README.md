@@ -51,6 +51,36 @@ The EEG code includes:
 - `eeg/pipeline/eeg_pipeline.py`  
   The production MacBook pipeline for live EEG streaming, classification, and websocket command emission.
 
+## Model Architectures
+
+Several PyTorch architectures were tested for classifying 100-sample EEG windows with two input channels into five command classes.
+
+### Flattened MLP
+
+`EEGFlattenedMLP` projects each two-channel EEG timestep into a higher-dimensional embedding, adds a learned positional embedding, flattens the full time window, and classifies it with a small MLP.
+
+This model is simple and fast, and it performed reasonably well. However, because it flattens the full sequence before classification, it does not have as strong an inductive bias for local temporal patterns in the EEG signal.
+
+### Transformer Encoder
+
+`EEGTransformerEncoder` projects the EEG window into token embeddings, prepends a learned classification token, adds positional embeddings, and applies multi-head self-attention followed by a feed-forward block.
+
+This architecture was tested to see whether attention over the full EEG window would help identify command-specific temporal relationships. In practice, it was the weakest performer in this experiment, likely because the dataset was small relative to the flexibility of the transformer.
+
+### 2D Convolutional Network
+
+`EEGConv2D` treats each EEG window as a small two-channel time-series image. Its first convolution spans the two input channels while moving across time, and its second convolution extracts higher-level temporal features before adaptive pooling and classification.
+
+This model performed better than the MLP and transformer, suggesting that local temporal structure and channel relationships were important for this EEG classification task.
+
+### Subtractive 2D Convolutional Network
+
+`EEGSubtractiveConv2D` was the best-performing architecture tested. It uses paired convolutional branches at each convolution stage, then subtracts one learned branch from the other with trainable scaling factors.
+
+This subtractive design matched the structure of the EEG setup well: the signal was already based on two frontal EEG channels with a reference electrode behind the left ear, and the model benefited from explicitly learning contrastive feature differences. Across validation trials, it achieved the strongest results, with about 77.7% average validation accuracy and about 84.5% best validation accuracy.
+
+The production EEG pipeline uses this subtractive convolutional model.
+
 ## Robot Control
 
 The robot side is built around the AiNex Raspberry Pi and its servo controller.
@@ -155,4 +185,3 @@ Training data and model weights are intentionally excluded from version control:
 - `eeg/training/model_weights/`
 
 These files can include biometric EEG samples and derived trained models, so they should be treated as private unless intentionally released.
-
