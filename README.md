@@ -1,5 +1,9 @@
 # Project Cerebrus
 
+![](images/IMG_7452.jpg)
+![](images/IMG_7453.jpg)
+![](images/IMG_7450.jpg)
+
 Project Cerebrus is an EEG-controlled robotics project that connects a PLUX NeuroBIT EEG hardware kit to a HiWonder AiNex robot. The system streams live EEG from a MacBook, classifies the signal into movement commands, sends those commands through a websocket relay server, and executes movement sequences on the Raspberry Pi inside the robot.
 
 The repository contains three main parts:
