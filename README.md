@@ -4,25 +4,25 @@
 ![](images/IMG_7453.jpg)
 ![](images/IMG_7450.jpg)
 
-Project Cerebrus is an EEG-controlled robotics project that connects a PLUX NeuroBIT EEG hardware kit to a HiWonder AiNex robot. The system streams live EEG from a MacBook, classifies the signal into movement commands, sends those commands through a websocket relay server, and executes movement sequences on the Raspberry Pi inside the robot.
+Project Cerebrus is an EEG-controlled robotics project that connects a PLUX NeuroBIT EEG hardware kit to a DIY humanoid robot (HiWonder). The system streams live data from the EEG hardware, classifies the signal into movement commands using subtractive convolutional layers, sends those commands through a websocket relay server, and executes movement sequences on the robot.
 
 The repository contains three main parts:
 
-- AiNex robot control code, including hardware access and servo movement sequences.
+- HiWonder robot control code, including hardware access and servo movement sequences.
 - EEG streaming, preprocessing, training, and inference code for the PLUX NeuroBIT EEG setup.
-- A websocket relay server that passes commands between the MacBook and the robot computer.
+- A websocket relay server that passes commands between the personal computer and the robot computer.
 
 ## System Overview
 
 In production, the pipeline runs across three machines/processes:
 
-1. The MacBook runs `eeg/pipeline/eeg_pipeline.py`.
+1. The personal computer runs `eeg/pipeline/eeg_pipeline.py`.
    It connects to the PLUX/OpenSignals LSL stream, preprocesses EEG windows, runs a trained PyTorch classifier, and sends predicted commands to the websocket server.
 
 2. The websocket server in `ws_server/` acts as a relay.
    It registers one EEG client and one robot client, then forwards classified EEG commands from the MacBook to the robot.
 
-3. The Raspberry Pi on the AiNex robot runs `main.py`.
+3. The computer on the robot runs `main.py`.
    It connects to the websocket server, receives commands, and drives the robot through predefined servo movement sequences.
 
 ## EEG Setup
@@ -87,7 +87,7 @@ The production EEG pipeline uses this subtractive convolutional model.
 
 ## Robot Control
 
-The robot side is built around the AiNex Raspberry Pi and its servo controller.
+The robot side is built around HiWonder hardware and their servo controller SDK.
 
 - `main.py`  
   Entry point for the Raspberry Pi on the robot.
@@ -131,13 +131,13 @@ The `ws_server/` folder contains the relay communication server between the MacB
 
 Create a Python virtual environment, then install the dependencies for the component you are running.
 
-For the MacBook EEG pipeline:
+For the personal computer EEG pipeline:
 
 ```bash
 pip install -r requirements.txt
 ```
 
-For the robot Raspberry Pi:
+For the robot:
 
 ```bash
 pip install -r requirements_robot.txt
@@ -169,13 +169,13 @@ cd ws_server
 python server.py
 ```
 
-Run the EEG pipeline on the MacBook:
+Run the EEG pipeline on the personal computer:
 
 ```bash
 python eeg/pipeline/eeg_pipeline.py
 ```
 
-Run the robot controller on the Raspberry Pi:
+Run the robot controller:
 
 ```bash
 python main.py
