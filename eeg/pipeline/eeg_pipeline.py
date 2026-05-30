@@ -11,7 +11,7 @@ from dotenv import load_dotenv
 EEG_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 sys.path.insert(0, EEG_DIR)
 
-from utils.eeg_mne_utils import preprocess_eeg_array_with_mne
+from utils.eeg_mne_utils import preprocess_eeg_array
 from utils.eeg_streamer import EEGStreamer
 from training.models import EEGSubtractiveConv2D
 
@@ -21,13 +21,13 @@ WS_URL = os.getenv("WS_URL")
 MODEL_WEIGHTS_PATH = "../training/model_weights/EEGSubtractiveConv2D.pt"
 NUM_RAW_CHANNELS = 4
 
-SAMPLES_PER_CLASSIFICATION = 100
+SAMPLES_PER_CLASSIFICATION = 1000
 
 LABELS_MAP = {
-    1: "left_clench",
-    2: "right_clench",
-    3: "bottom_clench",
-    4: "jaw_clench",
+    1: "tilt_left",
+    2: "tilt_right",
+    3: "jaw_clench",
+    4: "raise_eyebrows",
     0: "none"
 }
 
@@ -88,17 +88,10 @@ def main():
         if (curr_samples.shape[0] >= SAMPLES_PER_CLASSIFICATION):
             window = curr_samples[-SAMPLES_PER_CLASSIFICATION:]
             
-            clean_eeg = preprocess_eeg_array_with_mne(
+            clean_eeg = preprocess_eeg_array(
                 data = window,
-                sfreq = 100.0,
                 electrode_cols = [1, 2],
                 reference_col = 3,
-                ch_names = ["electrode_1", "electrode_2"],
-                input_units = "uV",
-                output_units = "uV",
-                l_freq = 1.0,
-                h_freq = 35.0,
-                notch_freq = None
             )
             
             x = torch.tensor(clean_eeg, dtype = torch.float32)
@@ -106,12 +99,23 @@ def main():
             x = x.to(device)
             
             with torch.no_grad():
-                logits = model(x)
-                pred = torch.argmax(logits, dim = 1)
+                logits = model(x) # [1, 5]
+                probs = torch.softmax(logits, dim = 1) # [1, 5]
+                confidence, pred = torch.max(probs, dim = 1)
+                
                 pred_value = int(pred.squeeze().item())
+                conf_value = float(confidence.squeeze().item())
             
             command = LABELS_MAP.get(pred_value)
-            sio.emit("command", command)
+            print(f"model classification: {command}")
+            print(f"model confidence: {conf_value:.3f}")
+            
+            message = {
+                "command": command,
+                "conf": conf_value
+            }
+        
+            sio.emit("command", message)
             
             curr_samples = np.empty((0, NUM_RAW_CHANNELS))
         

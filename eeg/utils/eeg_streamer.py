@@ -42,7 +42,7 @@ class EEGStreamer:
         if self.inlet is None:
             raise RuntimeError("Must call start() before pull_chunk()")
         
-        samples, _ = self.inlet.pull_chunk(timeout=1.0, max_samples=100)
+        samples, _ = self.inlet.pull_chunk(timeout=1.0, max_samples=1000)
         
         if not samples:
             print("No samples received...")

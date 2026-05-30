@@ -5,12 +5,18 @@ import os
 import numpy as np
 from torch.utils.data import Dataset, DataLoader
 import pandas as pd
+import sys
+
+EEG_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+sys.path.insert(0, EEG_DIR)
+
+from utils.eeg_mne_utils import preprocess_eeg_array
 
 LABELS_MAP = {
-    "left_clench": 1,
-    "right_clench": 2,
-    "bottom_clench": 3,
-    "jaw_clench": 4,
+    "tilt_left": 1,
+    "tilt_right": 2,
+    "jaw_clench": 3,
+    "raise_eyebrows": 4,
     "none": 0
 }
 
@@ -33,8 +39,8 @@ class EEGDataset(Dataset):
 
 def gen_train_val_datasets(trial_idx):
     data_dir = "training_data"
-    window_size = 100
-    stride = 1
+    window_size = 1000
+    stride = 250
     train_data_list = []
     val_data_list = []
     
@@ -80,13 +86,27 @@ def gen_train_val_datasets(trial_idx):
             for start in range(0, train_array.shape[0] - window_size + 1, stride):
                 end = start + window_size
                 window = train_array[start:end]
-                train_data_list.append({"data": window, "label": label})
+                
+                clean_eeg = preprocess_eeg_array(
+                    data = window,
+                    electrode_cols = [1, 2],
+                    reference_col = 3,
+                )
+                
+                train_data_list.append({"data": clean_eeg, "label": label})
         
         for val_array in val_arrays:
             for start in range(0, val_array.shape[0] - window_size + 1, stride):
                 end = start + window_size
                 window = val_array[start:end]
-                val_data_list.append({"data": window, "label": label})
+                
+                clean_eeg = preprocess_eeg_array(
+                    data = window,
+                    electrode_cols = [1, 2],
+                    reference_col = 3,
+                )
+                
+                val_data_list.append({"data": clean_eeg, "label": label})
     
     return EEGDataset(train_data_list), EEGDataset(val_data_list)
 
@@ -116,7 +136,7 @@ def train(model_class, train_dataset, trial_idx):
         epoch_total = 0
         
         for x, y in train_loader:
-            x = x.to(device) # [B, 100, 2]
+            x = x.to(device) # [B, 1000, 2]
             y =  y.to(device) # [B]
             
             logits = model(x)
@@ -159,7 +179,7 @@ def validate(model_class, model, val_dataset, trial_idx):
     
     with torch.no_grad():
         for x, y in val_loader:
-            x = x.to(device) # [B, 100, 2]
+            x = x.to(device) # [B, 1000, 2]
             y =  y.to(device) # [B]
             
             logits = model(x)

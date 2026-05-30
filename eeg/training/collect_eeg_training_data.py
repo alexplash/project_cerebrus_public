@@ -2,14 +2,18 @@
 import time
 import os
 import numpy as np
-from ..utils.eeg_mne_utils import preprocess_eeg_array_with_mne
-from ..utils.eeg_streamer import EEGStreamer
+import sys
+
+EEG_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+sys.path.insert(0, EEG_DIR)
+
+from utils.eeg_streamer import EEGStreamer
 
 TRAINING_DATA_LABELS = [
-    "left_clench", # turn left
-    "right_clench", # turn right
-    "bottom_clench", # forward
-    "jaw_clench", # stop
+    "tilt_left", # turn left
+    "tilt_right", # turn right
+    "jaw_clench", # forward
+    "raise_eyebrows", # stop
     "none" # nothing
 ]
 
@@ -48,28 +52,14 @@ def main():
     
     full_data = np.vstack(all_data)
     
-    clean_eeg = preprocess_eeg_array_with_mne(
-        data = full_data,
-        sfreq = 100.0,
-        electrode_cols = [1, 2],
-        reference_col = 3,
-        ch_names = ["electrode_1", "electrode_2"],
-        input_units = "uV",
-        output_units = "uV",
-        l_freq = 1.0,
-        h_freq = 35.0,
-        notch_freq = None
-    )
-    
     os.makedirs("training_data", exist_ok = True)
     
     output_path = f"training_data/{user_input}.npy"
-    np.save(output_path, clean_eeg)
+    np.save(output_path, full_data)
     
-    print(f"Saved clean EEG data to: {output_path}")
+    print(f"Saved EEG data to: {output_path}")
     print(f"Label: {user_input}")
     print(f"Raw EEG shape: {full_data.shape}")
-    print(f"Clean EEG shape: {clean_eeg.shape}")
 
 if __name__ == "__main__":
     main()

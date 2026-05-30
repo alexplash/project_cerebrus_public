@@ -6,7 +6,7 @@ class EEGFlattenedMLP(nn.Module):
     def __init__(
         self,
         input_dim: int = 2,
-        seq_len: int = 100,
+        seq_len: int = 1000,
         num_classes: int = 5,
         d_model: int = 128,
         hidden_dim: int = 256
@@ -49,7 +49,7 @@ class EEGTransformerEncoder(nn.Module):
     def __init__(
         self,
         input_dim: int = 2,
-        seq_len: int = 100,
+        seq_len: int = 1000,
         num_classes: int = 5,
         d_model: int = 128,
         num_heads: int = 8,
@@ -137,7 +137,7 @@ class EEGConv2D(nn.Module):
     def __init__(
         self,
         input_dim: int = 2,
-        seq_len: int = 100,
+        seq_len: int = 1000,
         num_classes: int = 5,
         conv1_channels: int = 32,
         conv2_channels: int = 64,
@@ -181,16 +181,16 @@ class EEGConv2D(nn.Module):
         
         batch_size, seq_len, input_dim = x.shape
         
-        # [B, 100, 2] -> [B, 1, 100, 2]
+        # [B, 1000, 2] -> [B, 1, 1000, 2]
         x = x.unsqueeze(1)
         
-        # [B, 1, 100, 2] -> [B, 32, 100, 1]
+        # [B, 1, 1000, 2] -> [B, 32, 1000, 1]
         x = self.conv1(x)
         
-        # [B, 32, 100, 1] -> [B, 64, 100, 1]
+        # [B, 32, 1000, 1] -> [B, 64, 1000, 1]
         x = self.conv2(x)
         
-        # [B, 64, 100, 1] -> [B, 64, 1, 1]
+        # [B, 64, 1000, 1] -> [B, 64, 1, 1]
         x = self.pool(x)
         
         # [B, 64, 1, 1] -> [B, 64]
@@ -206,7 +206,7 @@ class EEGSubtractiveConv2D(nn.Module):
     def __init__(
         self,
         input_dim: int = 2,
-        seq_len: int = 100,
+        seq_len: int = 1000,
         num_classes: int = 5,
         conv1_channels: int = 32,
         conv2_channels: int = 64,
@@ -274,20 +274,20 @@ class EEGSubtractiveConv2D(nn.Module):
         
         batch_size, seq_len, input_dim = x.shape
         
-        # [B, 100, 2] -> [B, 1, 100, 2]
+        # [B, 1000, 2] -> [B, 1, 1000, 2]
         x = x.unsqueeze(1)
         
-        # [B, 1, 100, 2] -> [B, 32, 100, 1]
+        # [B, 1, 1000, 2] -> [B, 32, 1000, 1]
         A = self.conv1_A(x)
         B = self.conv1_B(x)
         x = A - self.lambda1 * B
         
-        # [B, 32, 100, 1] -> [B, 64, 100, 1]
+        # [B, 32, 1000, 1] -> [B, 64, 1000, 1]
         A = self.conv2_A(x)
         B = self.conv2_B(x)
         x = A - self.lambda2 * B
         
-        # [B, 64, 100, 1] -> [B, 64, 1, 1]
+        # [B, 64, 1000, 1] -> [B, 64, 1, 1]
         x = self.pool(x)
         
         # [B, 64, 1, 1] -> [B, 64]
